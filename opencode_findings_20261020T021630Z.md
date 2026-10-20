@@ -16,10 +16,13 @@ findtorontoevents.ca/audit was supposed to surface **copy-trader** picks and an 
 
 Meanwhile the curated `smart_picks_feed` already contained 1 vetted pick (ETHUSDT SHORT, `copy_hl_RTB_2`, source `copy_trader_intel`) that was never promoted into `picks.smart_picks`. So the extraction existed but its output was dropped at the dashboard layer.
 
-## 3. Fix applied
-In `audit_trail/dashboard_generator.py`, after the strict quality-gates extraction, if `smart_picks` is empty, fall back to mapping the curated `smart_picks_feed.picks` into the dashboard pick shape and surface them (logged). This restores top-notch trades (including copy-trader picks) on the Smart Picks tab without weakening the underlying gates.
+## 3. Fix applied (revised after review)
+`smart_picks` stays strictly gate-validated (quality gates only). Unvalidated curated picks are NOT promoted as Smart Picks. Instead:
+- `picks.curated_feed`: curated smart_picks_feed picks labeled "Curated – not gate-validated" (separate field).
+- `picks.smart_picks_gate_failures`: counts per failed gate.
+- `picks.smart_picks_near_miss`: top 3 near-miss picks with their failed gate (contingency for empty state).
 
-Supporting doc: `updates/2026-10-20-audit-smart-picks-empty-fix.md` (in the analysis repo).
+PR: opencode/audit-empty-state (not merged). Supporting doc: `updates/2026-10-20-audit-empty-state.md`.
 
 ## 4. Money-ready status per asset class (from live payload)
 Tier thresholds (PERFORMANCE_CHARTER): T1 PF≥2.0/WR≥55%/MDD≤10%/n≥200; T2 PF≥1.5/WR≥50%/MDD≤20%/n≥100; T3 PF≥1.2/WR≥45%/MDD≤25%/n≥100.
